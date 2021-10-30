@@ -1,0 +1,277 @@
+openapi: 3.0.3
+info:
+  description: Challenge Me API
+  version: "1.0.0"
+  title: Challenge Me
+  contact:
+    email: "vadym.polianskyi@gmail.com"
+host: "challenge.me/v1"
+servers:
+- url: https://challenge.me/v1
+  description: Development server
+  variables:
+    port:
+      default: '8066'
+    basePath:
+      default: v1
+tags:
+- name: auth
+  description: Authorization part
+- name: user
+  description: User's operations
+- name: challenge
+  description: All about challenges
+schemes:
+- https
+- http
+paths:
+  /login:
+    post:
+      tags:
+      - auth
+      operationId: createToken
+      summary: Create a new token
+      description: Create a new token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "elon_musk"
+                password:
+                  type: string
+                  format: password
+                  example: "be4my!w1fe"
+      responses:
+        '200':
+          description: Create a new token for gaining authenticated access to resources
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  token:
+                    type: string
+        '401':
+          $ref: "#/components/responses/AccessDeniedError"
+
+  /user:
+    post:
+      tags:
+        - user
+      operationId: createUser
+      summary: Create user
+      description: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  $ref: "#/components/schemas/User"
+                password:
+                  type: string
+                  format: password
+                  example: "be4my!w1fe"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "400":
+          $ref: "#/components/responses/IllegalInput"
+    put:
+      tags:
+        - user
+      operationId: updateUser
+      summary: Update user
+      description: Update user's data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                  name:
+                    type: string
+                    nullable: true
+                  email:
+                    type: string
+                    nullable: true
+                  age:
+                    type: string
+                    nullable: true
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          description: "successful updating"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+      security:
+        - bearerAuth: [ ]
+  /user/{username}:
+    get:
+      tags:
+        - user
+      operationId: getUser
+      summary: Get user by username
+      description: Returns all user information
+      parameters:
+        - name: username
+          in: path
+          description: If needs challenges of 1 user
+          required: true
+          schema:
+            type: string
+            example: "elon_musk"
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Challenge"
+      security:
+        - basicAuth: [ ]
+
+  /challenge/list:
+    get:
+      tags:
+      - challenge
+      operationId: challengeList
+      summary: All challenges that user has ever participated
+      description: Returns a list of challenges
+      parameters:
+        - name: username
+          in: query
+          description: If needs challenges of 1 user
+          schema:
+            type: string
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Challenge"
+      security:
+        - basicAuth: [ ]
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    AccessDeniedError:
+      description: Wrong credentials
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    NotFound:
+      description: Entity not found.
+    IllegalInput:
+      description: Illegal input for operation.
+    GeneralError:
+      description: General Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GeneralError'
+  schemas:
+    GeneralError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Challenge:
+      type: "object"
+      properties:
+        id:
+          type: string
+          example: "3fds-fj70-22is-fds0"
+        name:
+          type: string
+          example: "Ice-bucket Challenge"
+        description:
+          type: string
+          example: "Instructions: \n 1.Do first \n 2.Do second"
+        from:
+          type: string
+          format: "date-time"
+        until:
+          type: string
+          format: "date-time"
+        frequency:
+          type: string
+          description: "Challenge frequency"
+          enum:
+          - HOUR
+          - DAY
+          - WEEK
+          - MONTH
+        price:
+          type: integer
+          example: 200
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "elon_musk"
+        name:
+          type: string
+          example: "Elon Musk"
+        email:
+          type: string
+          example: "elonmusk@gmail.com"
+        age:
+          type: integer
+          example: 43
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        payment-system:
+          type: string
+        card-number:
+          type: string
+        placeholder:
+          type: string
+        expiration-date:
+          type: string
+          format: date-time
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string

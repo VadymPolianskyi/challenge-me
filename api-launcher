@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "Pulling swagger image..."
+docker pull swaggerapi/swagger-ui
+
+echo "launching swagger..."
+docker-compose up -d
+echo "swagger is launched to  http://localhost:8001/"

@@ -6,9 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
+from project.config import reader
 from project.db.user import UserDaoInterface
 from project.model import TokenData
-from project.server.config import AuthConfig
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -31,10 +31,11 @@ class Authenticator:
 
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-    def __init__(self, auth_config: AuthConfig, user_dao: UserDaoInterface):
-        self.secret_key = auth_config.SECRET_KEY
-        self.algorithm = auth_config.ALGORITHM
-        self.access_token_expire_minutes = auth_config.ACCESS_TOKEN_EXPIRE_MINUTES
+    def __init__(self, user_dao: UserDaoInterface):
+        auth_config = reader.read("server", "auth")
+        self.secret_key = auth_config['secret_key']
+        self.algorithm = auth_config['algorithm']
+        self.access_token_expire_minutes = auth_config['access_token_expire_minutes']
         self.user_dao = user_dao
 
     def create_token(self, username: str):
@@ -82,8 +83,8 @@ class LoginManager(Authenticator):
         - verify and authenticate user
     """
 
-    def __init__(self, auth_config: AuthConfig, user_dao: UserDaoInterface):
-        super(LoginManager, self).__init__(auth_config, user_dao)
+    def __init__(self, user_dao: UserDaoInterface):
+        super(LoginManager, self).__init__(user_dao)
         self.user_dao = user_dao
 
     async def login_for_token(self, username: str, password: str):

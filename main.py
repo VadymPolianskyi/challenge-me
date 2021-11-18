@@ -3,10 +3,9 @@ from fastapi import Depends, FastAPI
 from project.db.user import MockDB
 from project.model import User, UserDTOFull, Token, Login
 from project.server.auth import LoginManager, create_password_hash
-from project.server.config import BaseConfig
 
 user_dao = MockDB()
-loginManager = LoginManager(BaseConfig.AUTH, user_dao)
+loginManager = LoginManager(user_dao)
 app = FastAPI()
 
 

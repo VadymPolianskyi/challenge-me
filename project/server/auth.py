@@ -60,7 +60,7 @@ class Authenticator:
         except JWTError:
             raise credentials_exception
         user = self.user_dao.get(username=token_data.username)
-        if user is None:
+        if not user:
             raise credentials_exception
         # todo: map user to UserDTO
         return user
@@ -87,20 +87,20 @@ class LoginManager(Authenticator):
         super(LoginManager, self).__init__(user_dao)
         self.user_dao = user_dao
 
-    async def login_for_token(self, username: str, password: str):
-        user = self.__authenticate_user(username, password)
-        if not user:
+    def login_for_token(self, username: str, password: str):
+        authenticated = self.__authenticate_user(username, password)
+        if not authenticated:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return super().create_token(user.username)
+        return super().create_token(username)
 
     def __authenticate_user(self, username: str, password: str):
-        user = self.user_dao.get(username)
-        if not user:
+        token = self.user_dao.get_user_token(username)
+        if not token:
             return False
-        if not verify_password(password, user.token):
+        if not verify_password(password, token):
             return False
-        return user
+        return True

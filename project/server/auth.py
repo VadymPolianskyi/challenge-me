@@ -6,9 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
+from project.config import reader
 from project.db.user import UserDaoInterface
 from project.model import TokenData
-from project.server.config import AuthConfig
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -31,14 +31,15 @@ class Authenticator:
 
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-    def __init__(self, auth_config: AuthConfig, user_dao: UserDaoInterface):
-        self.secret_key = auth_config.SECRET_KEY
-        self.algorithm = auth_config.ALGORITHM
-        self.access_token_expire_minutes = auth_config.ACCESS_TOKEN_EXPIRE_MINUTES
+    def __init__(self, user_dao: UserDaoInterface):
+        auth_config = reader.auth
+        self.secret_key = auth_config['secret_key']
+        self.algorithm = auth_config['algorithm']
+        self.access_token_expire_days = int(auth_config['access_token_expire_days'])
         self.user_dao = user_dao
 
     def create_token(self, username: str):
-        access_token_expires = timedelta(minutes=self.access_token_expire_minutes)
+        access_token_expires = timedelta(days=self.access_token_expire_days)
         access_token = self.__create_access_token(
             data={"username": username}, expires_delta=access_token_expires
         )
@@ -59,7 +60,7 @@ class Authenticator:
         except JWTError:
             raise credentials_exception
         user = self.user_dao.get(username=token_data.username)
-        if user is None:
+        if not user:
             raise credentials_exception
         # todo: map user to UserDTO
         return user
@@ -82,24 +83,24 @@ class LoginManager(Authenticator):
         - verify and authenticate user
     """
 
-    def __init__(self, auth_config: AuthConfig, user_dao: UserDaoInterface):
-        super(LoginManager, self).__init__(auth_config, user_dao)
+    def __init__(self, user_dao: UserDaoInterface):
+        super(LoginManager, self).__init__(user_dao)
         self.user_dao = user_dao
 
-    async def login_for_token(self, username: str, password: str):
-        user = self.__authenticate_user(username, password)
-        if not user:
+    def login_for_token(self, username: str, password: str):
+        authenticated = self.__authenticate_user(username, password)
+        if not authenticated:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return super().create_token(user.username)
+        return super().create_token(username)
 
     def __authenticate_user(self, username: str, password: str):
-        user = self.user_dao.get(username)
-        if not user:
+        token = self.user_dao.get_user_token(username)
+        if not token:
             return False
-        if not verify_password(password, user.token):
+        if not verify_password(password, token):
             return False
-        return user
+        return True

@@ -56,10 +56,9 @@ class Authenticator:
             username: str = payload.get("username")
             if username is None:
                 raise credentials_exception
-            token_data = TokenData(username=username)
         except JWTError:
             raise credentials_exception
-        user = self.user_dao.get(username=token_data.username)
+        user = self.user_dao.get(username=username)
         if not user:
             raise credentials_exception
         # todo: map user to UserDTO

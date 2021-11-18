@@ -143,38 +143,58 @@ paths:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "200":
+          description: ""
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Challenge"
+                  $ref: "#/components/schemas/User"
       security:
         - basicAuth: [ ]
 
-  /challenge/list:
+  /challenge:
+    post:
+      tags:
+        - challenge
+      operationId: createChallenge
+      summary: Create a new Challenge
+      description: Creates a new challenge
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeInp"
+      responses:
+        "200":
+          description: "Successfully created challenge."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Challenge'
+        "400":
+          $ref: "#/components/responses/IllegalInput"
+  /challenge/{id}:
     get:
       tags:
         - challenge
-      operationId: challengeList
-      summary: All challenges that user has ever participated
-      description: Returns a list of challenges
+      operationId: getChallengeById
+      summary: Get Challenge by id
+      description: Returns Challenge
       parameters:
-        - name: username
+        - name: id
           in: query
-          description: If needs challenges of 1 user
           schema:
             type: string
       responses:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "200":
+          description: ""
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Challenge"
+                $ref: "#/components/schemas/Challenge"
       security:
         - basicAuth: [ ]
 
@@ -220,10 +240,13 @@ components:
         description:
           type: string
           example: "Instructions: \n 1.Do first \n 2.Do second"
-        from:
+        active_from:
           type: string
           format: "date-time"
-        until:
+        active_until:
+          type: string
+          format: "date-time"
+        created:
           type: string
           format: "date-time"
         frequency:
@@ -234,6 +257,37 @@ components:
           - DAY
           - WEEK
           - MONTH
+        price:
+          type: integer
+          example: 200
+        creator:
+          type: string
+          example: "tommy"
+    ChallengeInp:
+      type: "object"
+      properties:
+        name:
+          type: string
+          example: "Ice-bucket Challenge"
+        description:
+          type: string
+          example: "Instructions: \n 1.Do first \n 2.Do second"
+        active_from:
+          type: string
+          format: "date-time"
+          example: "2021-12-15T10:53:00"
+        active_until:
+          type: string
+          format: "date-time"
+          example: "2021-12-15T10:53:00"
+        frequency:
+          type: string
+          description: "Challenge frequency"
+          enum:
+            - HOUR
+            - DAY
+            - WEEK
+            - MONTH
         price:
           type: integer
           example: 200

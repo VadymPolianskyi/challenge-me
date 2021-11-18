@@ -8,7 +8,6 @@ from passlib.context import CryptContext
 
 from project.config import reader
 from project.db.user import UserDaoInterface
-from project.model import TokenData
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

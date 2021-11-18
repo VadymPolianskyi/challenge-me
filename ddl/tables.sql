@@ -9,16 +9,21 @@ CREATE TABLE "user" (
 
 CREATE TYPE frequency AS ENUM ('HOUR', 'DAY', 'WEEK', 'MONTH');
 
-CREATE TABLE challenge(
-  id varchar NOT NULL,
-  "name" varchar,
-  description varchar,
-  "from" timestamp,
-  "until" timestamp,
-  created timestamp,
-  frequency frequency,
-  price integer,
-  PRIMARY KEY(id)
+create table challenge
+(
+    id           varchar not null
+        constraint challenge_pkey
+            primary key,
+    name         varchar,
+    description  varchar,
+    active_from  timestamp,
+    active_until timestamp,
+    created      timestamp,
+    frequency    frequency,
+    price        double precision,
+    creator      varchar
+        constraint challenge_user_username_fk
+            references "user"
 );
 
 CREATE TABLE payment(

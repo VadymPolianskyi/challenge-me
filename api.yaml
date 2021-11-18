@@ -5,7 +5,6 @@ info:
   title: Challenge Me
   contact:
     email: "vadym.polianskyi@gmail.com"
-host: "challenge.me/v1"
 servers:
 - url: https://challenge.me/v1
   description: Development server
@@ -21,9 +20,6 @@ tags:
   description: User's operations
 - name: challenge
   description: All about challenges
-schemes:
-- https
-- http
 paths:
   /login:
     post:
@@ -51,44 +47,51 @@ paths:
           content:
             application/json:
               schema:
-                type: "object"
-                properties:
-                  token:
-                    type: string
+                $ref: '#/components/schemas/Token'
         '401':
           $ref: "#/components/responses/AccessDeniedError"
 
-  /user:
+  /registration:
     post:
       tags:
-        - user
-      operationId: createUser
-      summary: Create user
+        - auth
+      operationId: registration
+      summary: Register a new User
       description: Register a new user
       requestBody:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  $ref: "#/components/schemas/User"
-                password:
-                  type: string
-                  format: password
-                  example: "be4my!w1fe"
+              $ref: "#/components/schemas/RegistrationUser"
       responses:
         "200":
+          description: "Successfully created user."
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
+                $ref: '#/components/schemas/Token'
         "400":
           $ref: "#/components/responses/IllegalInput"
+
+  /user/me:
+    get:
+      tags:
+        - user
+      operationId: getUser
+      summary: Get own profile
+      description: Returns all user information
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          description: "User's own information"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+        - basicAuth: [ ]
+  /user:
     put:
       tags:
         - user
@@ -101,15 +104,15 @@ paths:
             schema:
               type: object
               properties:
-                  name:
-                    type: string
-                    nullable: true
-                  email:
-                    type: string
-                    nullable: true
-                  age:
-                    type: string
-                    nullable: true
+                name:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  nullable: true
+                age:
+                  type: string
+                  nullable: true
       responses:
         "401":
           $ref: "#/components/responses/UnauthorizedError"
@@ -152,7 +155,7 @@ paths:
   /challenge/list:
     get:
       tags:
-      - challenge
+        - challenge
       operationId: challengeList
       summary: All challenges that user has ever participated
       description: Returns a list of challenges
@@ -249,6 +252,34 @@ components:
         age:
           type: integer
           example: 43
+    RegistrationUser:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "elon_musk"
+        name:
+          type: string
+          example: "Elon Musk"
+        email:
+          type: string
+          example: "elonmusk@gmail.com"
+        age:
+          type: integer
+          example: 43
+        password:
+          type: string
+          format: password
+          example: "secret"
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "ifodjsf8fj092j02efje298fje2fije29.fdw9f2ppk"
+        token_type:
+          type: string
+          example: "bearer"
     Payment:
       type: object
       properties:

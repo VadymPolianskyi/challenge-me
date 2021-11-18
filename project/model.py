@@ -32,5 +32,5 @@ class UserDTO(BaseModel):
     age: Optional[int] = None
 
 
-class UserDTOFull(UserDTO):
+class RegistrationUserDTO(UserDTO):
     password: str

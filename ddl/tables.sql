@@ -7,6 +7,8 @@ CREATE TABLE "user" (
   PRIMARY KEY(username)
 );
 
+CREATE TYPE frequency AS ENUM ('HOUR', 'DAY', 'WEEK', 'MONTH');
+
 CREATE TABLE challenge(
   id varchar NOT NULL,
   "name" varchar,
@@ -14,7 +16,7 @@ CREATE TABLE challenge(
   "from" timestamp,
   "until" timestamp,
   created timestamp,
-  frequency varchar("HOUR", "DAY", "WEEK", "MONTH"),
+  frequency frequency,
   price integer,
   PRIMARY KEY(id)
 );

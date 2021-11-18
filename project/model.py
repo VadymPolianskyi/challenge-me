@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -30,3 +31,24 @@ class UserDTO(BaseModel):
 
 class RegistrationUserDTO(UserDTO):
     password: str
+
+
+class Challenge(BaseModel):
+    id: str
+    name: str = None
+    description: Optional[str] = None
+    active_from: datetime
+    active_until: Optional[datetime] = None
+    created: Optional[datetime] = None
+    frequency: str
+    price: float
+    creator: str
+
+
+class ChallengeDTO(BaseModel):
+    name: str = None
+    description: Optional[str] = None
+    active_from: datetime
+    active_until: Optional[datetime] = None
+    frequency: str
+    price: float

@@ -32,14 +32,14 @@ class Authenticator:
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
     def __init__(self, user_dao: UserDaoInterface):
-        auth_config = reader.read("server", "auth")
+        auth_config = reader.auth
         self.secret_key = auth_config['secret_key']
         self.algorithm = auth_config['algorithm']
-        self.access_token_expire_minutes = auth_config['access_token_expire_minutes']
+        self.access_token_expire_days = int(auth_config['access_token_expire_days'])
         self.user_dao = user_dao
 
     def create_token(self, username: str):
-        access_token_expires = timedelta(minutes=self.access_token_expire_minutes)
+        access_token_expires = timedelta(days=self.access_token_expire_days)
         access_token = self.__create_access_token(
             data={"username": username}, expires_delta=access_token_expires
         )

@@ -49,12 +49,18 @@ async def get_user_me(current_user: User = Depends(loginManager.get_current_user
 
 @app.post("/challenge", response_model=Challenge)
 async def create_challenge(req: ChallengeDTO, current_user: User = Depends(loginManager.get_current_user)):
-    print(req)
     challenge = Challenge(id=str(uuid.uuid4()), name=req.name, description=req.description, active_from=req.active_from,
                           active_until=req.active_until, frequency=req.frequency, price=req.price,
                           creator=current_user.username,
                           created=time.time())
+    print(f"Created challenge: {challenge}")
     return challenge_dao.save(challenge)
+
+
+@app.get("/challenge/{id}", response_model=Challenge)
+async def get_challenge(id: str, current_user: User = Depends(loginManager.get_current_user)):
+    challenge = challenge_dao.get(id)
+    return challenge
 
 
 if __name__ == '__main__':

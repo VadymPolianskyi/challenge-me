@@ -46,9 +46,15 @@ class Challenge(BaseModel):
 
 
 class ChallengeDTO(BaseModel):
-    name: str = None
+    name: str
     description: Optional[str] = None
     active_from: datetime
     active_until: Optional[datetime] = None
     frequency: str
     price: float
+
+
+class Participation(BaseModel):
+    challenge_id: str
+    username: str
+    active: bool = True

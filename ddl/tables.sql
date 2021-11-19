@@ -1,13 +1,14 @@
-CREATE TABLE "user" (
-  username varchar NOT NULL,
+create table "user" (
+  username varchar not null,
   "name" varchar,
   age integer,
   token varchar,
   email varchar,
-  PRIMARY KEY(username)
+  primary key(username)
 );
 
-CREATE TYPE frequency AS ENUM ('HOUR', 'DAY', 'WEEK', 'MONTH');
+
+create type frequency as enum ('HOUR', 'DAY', 'WEEK', 'MONTH');
 
 create table challenge
 (
@@ -26,6 +27,34 @@ create table challenge
             references "user"
 );
 
+
+create table participation
+(
+    challenge_id varchar not null
+        constraint participation_challenge_id_fk
+            references challenge,
+    "user"       varchar not null
+        constraint participation_user_username_fk
+            references "user",
+    active       boolean,
+    constraint participation_pk
+        primary key (challenge_id, "user")
+);
+
+
+create table "check"
+(
+    challenge_id varchar not null
+        constraint check_challenge_id_fk
+            references challenge,
+    "user"       varchar not null
+        constraint chek_user_username_fk
+            references "user",
+    timestamp timestamp,
+    constraint check_pk
+        primary key (challenge_id, "user")
+);
+
 CREATE TABLE payment(
   id varchar NOT NULL,
   "user" varchar NOT NULL,
@@ -35,12 +64,4 @@ CREATE TABLE payment(
   placeholder varchar,
   PRIMARY KEY(id),
   CONSTRAINT "Forein key" UNIQUE("user")
-);
-
-CREATE TABLE participation(
-  challenge_id varchar NOT NULL,
-  "user" varchar NOT NULL,
-  "time" varchar NOT NULL,
-  status varchar,
-  PRIMARY KEY(challenge_id, "time", "user")
 );

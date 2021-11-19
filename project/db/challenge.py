@@ -1,5 +1,5 @@
 from project.db.connect import open_connection_cursor, open_connection
-from project.model import Challenge, Participation
+from project.model import Challenge, Participation, Check
 
 
 class ChallengeDaoInterface:
@@ -50,7 +50,6 @@ class ChallengeDao(ChallengeDaoInterface):
     def save_participation(self, participation: Participation) -> Participation:
         with open_connection() as conn:
             with conn.cursor() as cursor:
-                print(participation)
                 cursor.execute(
                     'INSERT INTO participation (challenge_id, "user", active) VALUES(%(challenge_id)s, %(username)s, %(active)s) ON CONFLICT (challenge_id, "user") DO UPDATE SET active=%(active)s;',
                     {'challenge_id': participation.challenge_id, 'username': participation.username,
@@ -59,6 +58,17 @@ class ChallengeDao(ChallengeDaoInterface):
                 print(
                     f"Successfully upserted participation of user('{participation.username}') in challenge('{participation.challenge_id}') with active={participation.active}.")
         return participation
+
+    def save_check(self, check: Check) -> Check:
+        with open_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    'INSERT INTO "check" (challenge_id, "user", timestamp) VALUES(%(challenge_id)s, %(username)s, %(timestamp)s);',
+                    {'challenge_id': check.challenge_id, 'username': check.username,
+                     'timestamp': check.timestamp})
+                conn.commit()
+                print(f"Successfully upserted check of user('{check.username}') in challenge('{check.challenge_id}').")
+        return check
 
     def get_all_active_challenges(self, username: str) -> list[Challenge]:
         with open_connection_cursor() as cursor:

@@ -58,3 +58,9 @@ class Participation(BaseModel):
     challenge_id: str
     username: str
     active: bool = True
+
+
+class Check(BaseModel):
+    challenge_id: str
+    username: str
+    timestamp: datetime = datetime.now()

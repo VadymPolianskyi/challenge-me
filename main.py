@@ -6,7 +6,8 @@ from fastapi import Depends, FastAPI
 
 from project.db.challenge import ChallengeDao
 from project.db.user import UserDao
-from project.model import User, Token, Login, RegistrationUserDTO, UserDTO, Challenge, ChallengeDTO
+from project.model import User, Token, Login, RegistrationUserDTO, UserDTO, Challenge, ChallengeDTO, Participation, \
+    Check
 from project.server.auth import LoginManager, create_password_hash
 
 user_dao = UserDao()
@@ -61,6 +62,25 @@ async def create_challenge(req: ChallengeDTO, current_user: User = Depends(login
 async def get_challenge(id: str, current_user: User = Depends(loginManager.get_current_user)):
     challenge = challenge_dao.get(id)
     return challenge
+
+
+@app.get("/challenge/{id}/subscribe", response_model=Challenge)
+async def subscribe_challenge(id: str, current_user: User = Depends(loginManager.get_current_user)):
+    challenge_dao.save_participation(Participation(challenge_id=id, username=current_user.username))
+    challenge = challenge_dao.get(id)
+    return challenge
+
+
+@app.get("/challenge/{id}/check")
+async def check_challenge(id: str, current_user: User = Depends(loginManager.get_current_user)):
+    challenge_dao.save_check(Check(challenge_id=id, username=current_user.username))
+    return {"status": 200}
+
+
+@app.get("/challenges", response_model=list[Challenge])
+async def own_challenges(current_user: User = Depends(loginManager.get_current_user)):
+    challenges = challenge_dao.get_all_active_challenges(current_user.username)
+    return challenges
 
 
 if __name__ == '__main__':

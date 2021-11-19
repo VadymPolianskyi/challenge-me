@@ -197,6 +197,76 @@ paths:
                 $ref: "#/components/schemas/Challenge"
       security:
         - basicAuth: [ ]
+  /challenge/{id}/subscribe:
+    get:
+      tags:
+        - challenge
+      operationId: subscribeChallenge
+      summary: Subscribe Challenge by id
+      description: Subscribes user and returns subscribed Challenge
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Challenge"
+      security:
+        - basicAuth: [ ]
+  /challenge/{id}/check:
+    get:
+      tags:
+        - challenge
+      operationId: checkChallenge
+      summary: Do Check for User in Challenge
+      description: Save check for Challenge with timestamp
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: string
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    example: 200
+      security:
+        - basicAuth: [ ]
+  /challenges:
+    get:
+      tags:
+        - challenge
+      operationId: allActiveChallenges
+      summary: All Active Challenges
+      description: List all active Challenges of user
+      responses:
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Challenge"
+      security:
+        - basicAuth: [ ]
 
 components:
   securitySchemes:

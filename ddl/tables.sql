@@ -44,15 +44,15 @@ create table participation
 
 create table "check"
 (
-    challenge_id varchar not null
+    challenge_id varchar   not null
         constraint check_challenge_id_fk
             references challenge,
-    "user"       varchar not null
+    "user"       varchar   not null
         constraint chek_user_username_fk
             references "user",
-    timestamp timestamp,
+    timestamp    timestamp not null,
     constraint check_pk
-        primary key (challenge_id, "user")
+        primary key (challenge_id, "user", timestamp)
 );
 
 CREATE TABLE payment(

@@ -10,4 +10,4 @@ def open_connection():
 
 def open_connection_cursor():
     print('Cursor from Connection to the PostgreSQL database...')
-    return open_connection.cursor()
+    return open_connection().cursor()
